@@ -1,0 +1,11 @@
+#define DCSBIOS_DEFAULT_SERIAL
+
+#include <FastLED.h>
+#include <DcsBios.h>
+#include "Arduino.h"
+
+#define NUM_VIDEO_RECORDER_LEDS 16
+
+int VIDEO_RECORDER_LED_LIST[NUM_VIDEO_RECORDER_LEDS] = {};
+
+CRGBArray<NUM_VIDEO_RECORDER_LEDS> VIDEO_RECORDER_LEDS;
