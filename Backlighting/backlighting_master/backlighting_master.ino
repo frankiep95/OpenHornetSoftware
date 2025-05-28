@@ -44,8 +44,9 @@ int UIP_LED_LIST[135] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21
 void onInstPnlDimmerChange(unsigned int newValue) {
 updateBacklight(newValue,IFEI_LED_LIST,NUM_IFEI_LEDS);
 updateBacklight(newValue,VIDEO_RECORDER_LED_LIST,NUM_VIDEO_RECORDER_LEDS);
-updateBacklight(newValue,LIP_LED_LIST,LIP_LEDS);
-updateBacklight(newValue, UIP_LED_LIST,UIP_NUM_LEDS);
+updateBacklight(newValue,STATION_SELECT_LED_LIST,NUM_STATION_SELECT_LEDS);
+// updateBacklight(newValue,LIP_LED_LIST,LIP_LEDS);
+// updateBacklight(newValue, UIP_LED_LIST,UIP_NUM_LEDS);
 }
 DcsBios::IntegerBuffer instPnlDimmerBuffer(FA_18C_hornet_INST_PNL_DIMMER, onInstPnlDimmerChange);
 
@@ -59,6 +60,8 @@ void setup() {
   // FastLED.addLeds<LED_TYPE, UIP_CH2,COLOUR_ORDER>(uip_LEDS,UIP_NUM_LEDS);       
   FastLED.setDither(false);
   FastLED.show();
+
+
 
   DcsBios::setup();
 

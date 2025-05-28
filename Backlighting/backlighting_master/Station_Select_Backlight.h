@@ -1,16 +1,21 @@
 #define NUM_STATION_SELECT_LEDS 32
 
+int STATION_SELECT_LED_LIST[NUM_STATION_SELECT_LEDS -8]= {1,2,5,7,9,10,12,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+
 CRGBArray<NUM_STATION_SELECT_LEDS> STATION_SELECT_LEDS;
 
 
-// void onSjCtrChange(unsigned int newValue) {
-//     if(newValue > 0){newValue = 255;}
+void onSjCtrChange(unsigned int newValue) {
+    if(newValue > 0){newValue = 255;}
 
-//   int sjCtrLEDS[2] = {63,66};
-//   updateLEDS(newValue,sjCtrLEDS,2,GLOBAL_HUE,255);
+  // int sjCtrLEDS[2] = {63,66};
+  // updateLEDS(newValue,sjCtrLEDS,2,GLOBAL_HUE,255);
+      STATION_SELECT_LEDS[8] = CHSV(100,255,newValue);
+    STATION_SELECT_LEDS[11] = CHSV(100,255,newValue);
+      FastLED.show();
 
-// }
-// DcsBios::IntegerBuffer sjCtrBuffer(FA_18C_hornet_SJ_CTR, onSjCtrChange);
+}
+DcsBios::IntegerBuffer sjCtrBuffer(FA_18C_hornet_SJ_CTR, onSjCtrChange);
 
 void onSjLiLtChange(unsigned int newValue) {
     if(newValue > 0){newValue = 255;}
@@ -34,24 +39,30 @@ DcsBios::IntegerBuffer sjLiLtBuffer(FA_18C_hornet_SJ_LI_LT, onSjLiLtChange);
 
 
 
-// void onSjRiChange(unsigned int newValue) {
-//     if(newValue > 0){newValue = 255;}
+void onSjRiChange(unsigned int newValue) {
+    if(newValue > 0){newValue = 255;}
 
-//   int sjRiLEDS[2] ={61,59};
-//   updateLEDS(newValue,sjRiLEDS,2,100,255);
-// }
-// DcsBios::IntegerBuffer sjRiBuffer(FA_18C_hornet_SJ_RI, onSjRiChange);
+  // int sjRiLEDS[2] ={61,59};
+  // updateLEDS(newValue,sjRiLEDS,2,100,255);
+      STATION_SELECT_LEDS[4] = CHSV(100,255,newValue);
+    STATION_SELECT_LEDS[6] = CHSV(100,255,newValue);
+      FastLED.show();
+}
+DcsBios::IntegerBuffer sjRiBuffer(FA_18C_hornet_SJ_RI, onSjRiChange);
 
 
 
-// void onSjRoChange(unsigned int newValue) {
-//     if(newValue > 0){newValue = 255;}
+void onSjRoChange(unsigned int newValue) {
+    if(newValue > 0){newValue = 255;}
 
 //  int sjRoLEDS[2] = {58,55};
 //  updateLEDS(newValue,sjRoLEDS,2,GLOBAL_HUE,255);
+    STATION_SELECT_LEDS[0] = CHSV(100,255,newValue);
+    STATION_SELECT_LEDS[3] = CHSV(100,255,newValue);
+      FastLED.show();
 
-// }
-// DcsBios::IntegerBuffer sjRoBuffer(FA_18C_hornet_SJ_RO, onSjRoChange);
+}
+DcsBios::IntegerBuffer sjRoBuffer(FA_18C_hornet_SJ_RO, onSjRoChange);
 
 // void onFlpLgNoseGearLtChange(unsigned int newValue) {
 //     if(newValue > 0){newValue = 100;}
