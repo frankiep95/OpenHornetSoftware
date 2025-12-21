@@ -67,9 +67,7 @@
  * serial interface
  * 
  */
-
-
-#define MUXADDRESS 6
+#define MUXADDRESS 3
 #define DCSBIOS_MUX_SERIAL
 #include "DcsBios.h"
 #ifdef __AVR__
@@ -77,21 +75,22 @@
 #endif
 
 
+#define L_GEN_NORM A3
+#define BATT_ON 2
+#define BATT_ORIDE A2
+#define R_GEN_NORM 3
+#define COIL1 15
+#define COIL1 6
+#define COIL1 14
+#define COIL1 7
+#define COIL1 16
+#define COIL1 8
+#define COIL1 10
+#define COIL1 9
 
-// Define pins for DCS-BIOS per interconnect diagram.
-#define PROBE_SW1 15 
-#define PROBE_SW2 6 
-#define WING_SW1  14
-#define WING_SW2  7
-#define CTR_SW1   16
-#define CTR_SW2   8
-#define DUMP_SW1  10
-#define COIL1     2
-
-DcsBios::Switch3Pos probeSw("PROBE_SW", PROBE_SW2, PROBE_SW1);
-DcsBios::Switch3Pos extWngTankSw("EXT_WNG_TANK_SW", WING_SW2, WING_SW1);
-DcsBios::Switch3Pos extCntTankSw("EXT_CNT_TANK_SW", CTR_SW2, CTR_SW1);
-DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
+DcsBios::Switch2Pos lGenSw("L_GEN_SW", L_GEN_NORM);
+DcsBios::Switch3Pos batterySw("BATTERY_SW", BATT_ORIDE, BATT_ON);
+DcsBios::Switch2Pos rGenSw("R_GEN_SW", R_GEN_NORM);
 
 /**
 * Arduino Setup Function
@@ -100,9 +99,6 @@ DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
 * only once at the programm start, belongs in this function.
 */
 void setup() {
-
-pinMode(COIL1, OUTPUT);
-digitalWrite(COIL1, LOW);
   // Run DCS Bios setup function
   DcsBios::setup();
 }
@@ -113,38 +109,23 @@ digitalWrite(COIL1, LOW);
 * Arduino standard Loop Function. Code who should be executed
 * over and over in a loop, belongs in this function.
 */
-unsigned int value = 0;
 void loop() {
 
   //Run DCS Bios loop function
   DcsBios::loop();
-  checkSwitches();
+
+  // checkSwitches();
 
 
 }
 
-void checkSwitches(){
-  if(DcsBios::CheckBus()){
-    String add = DcsBios::getAddress();
-    unsigned int value = DcsBios::getAmount();
-    if(add == "DUMP"){
-      outputDebounce(COIL1,value,100);
-    }
-  }
-}
+// void checkSwitches(){
+//   if(DcsBios::CheckBus()){
+//     String add = DcsBios::getAddress();
+//     unsigned int value = DcsBios::getAmount();
+//     if(add == "APU1"){
+//       digitalWrite(APU_COIL,value);
+//     }
 
-void outputDebounce(uint8_t pin, unsigned int value, int delay ){
-  bool blockUpdate = false;
-  unsigned long elapsedTime = 0;
-
-  if(!blockUpdate){
-    elapsedTime  = millis();
-    blockUpdate = true;
-    digitalWrite(pin,value);
-  }
-  else{
-    if ((millis-elapsedTime) > delay){
-        blockUpdate = false;
-    }
-  }
-}
+//   }
+// }

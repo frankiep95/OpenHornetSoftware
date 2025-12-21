@@ -137,7 +137,15 @@ bool wowRight = true;             ///< Initializing weight-on-wheel value for co
 bool wowNose = true;              ///< Initializing weight-on-wheel value for cold/ground start.
 unsigned int rpmL = 0;            ///< Initializing engine RPM for cold start
 unsigned int rpmR = 0;            ///< Initializing engine RPM for cold start
-
+char internalFuel[6];
+char bingo[5];
+int bingoNumber = 0;
+int internalFuelNumber = 0;
+bool dumpValue = false;
+bool crankValue = false;
+unsigned int leftNozzle = 0;
+unsigned int rightNozzle = 0;
+int crankSw = 1;
 
 
 void onLandingGearHandleLtChange(unsigned int newValue) {
@@ -145,6 +153,60 @@ void onLandingGearHandleLtChange(unsigned int newValue) {
     muxBus.send(1, data, strlen((char*)data));
   }
   DcsBios::IntegerBuffer landingGearHandleLtBuffer(FA_18C_hornet_LANDING_GEAR_HANDLE_LT, onLandingGearHandleLtChange);
+
+  void onApuControlSwChange(unsigned int newValue) {
+    sprintf((char*)data, "APU1 %d", newValue);
+    muxBus.send(5, data, strlen((char*)data));
+  }DcsBios::IntegerBuffer apuControlSwBuffer(FA_18C_hornet_APU_CONTROL_SW, onApuControlSwChange);
+
+  void onApuReadyLtChange(unsigned int newValue) {
+    sprintf((char*)data, "APLT %d", newValue);
+    muxBus.send(5, data, strlen((char*)data));
+    if(newValue == 0){
+      sprintf((char*)data, "APU1 %d", 0);
+      muxBus.send(5, data, strlen((char*)data));
+    }   
+  }DcsBios::IntegerBuffer apuReadyLtBuffer(FA_18C_hornet_APU_READY_LT, onApuReadyLtChange);
+
+  void onEngineCrankSwChange(unsigned int newValue) {
+    crankSw = newValue;
+    sprintf((char*)data, "CRNK %d", newValue);
+    muxBus.send(5, data, strlen((char*)data));
+  }DcsBios::IntegerBuffer engineCrankSwBuffer(FA_18C_hornet_ENGINE_CRANK_SW, onEngineCrankSwChange);
+
+  void onFuelDumpSwChange(unsigned int newValue) {
+    if(newValue == 1){
+      dumpValue = true;
+    }
+    sprintf((char*)data, "DUMP %d", newValue);
+    muxBus.send(6, data, strlen((char*)data)); 
+  }DcsBios::IntegerBuffer fuelDumpSwBuffer(FA_18C_hornet_FUEL_DUMP_SW, onFuelDumpSwChange);
+
+  void onExtNozzlePosRChange(unsigned int newValue) {
+    rightNozzle = newValue;
+  }DcsBios::IntegerBuffer extNozzlePosRBuffer(FA_18C_hornet_EXT_NOZZLE_POS_R, onExtNozzlePosRChange);
+
+  void onExtNozzlePosLChange(unsigned int newValue) {
+    leftNozzle = newValue;
+  }DcsBios::IntegerBuffer extNozzlePosLBuffer(FA_18C_hornet_EXT_NOZZLE_POS_L, onExtNozzlePosLChange);
+
+  void onIfeiFuelDownChange(char* newValue) {
+    for( int a =0; a <6; a++){
+      internalFuel[a] = newValue[a];
+    }
+    String internalFuelString = String(internalFuel);
+    internalFuelNumber = internalFuelString.toInt();
+  }
+  DcsBios::StringBuffer<6> ifeiFuelDownBuffer(FA_18C_hornet_IFEI_FUEL_DOWN_A, onIfeiFuelDownChange);
+
+  void onIfeiBingoChange(char* newValue) {
+    for( int a =0; a <5; a++){
+      bingo[a] = newValue[a];
+    }
+    String bingoString = String(bingo);
+    bingoNumber = bingoString.toInt();
+  }DcsBios::StringBuffer<5> ifeiBingoBuffer(FA_18C_hornet_IFEI_BINGO_A, onIfeiBingoChange);
+
 
 
 void onHookBypassSwChange(unsigned int newValue) {
@@ -223,10 +285,6 @@ void onExtWowRightChange(unsigned int newValue) {
 } DcsBios::IntegerBuffer extWowRightBuffer(0x74d6, 0x8000, 15, onExtWowRightChange);
 
 
-// unsigned int newValue = 0;
-// unsigned int val2 = 0;
-// unsigned int val3 = 0;
-
 void setup() {
   pinMode(17, OUTPUT);
   Serial.begin(250000);
@@ -238,7 +296,10 @@ void setup() {
 uint8_t ID;
 uint8_t buffer[50];
 uint8_t len;
-
+unsigned int total = 65535;
+int delayOff = 15000;
+unsigned long startTime;
+bool hold = false;
 
 void loop() {
   DcsBios::loop();
@@ -298,6 +359,39 @@ void loop() {
     }
   }
 
+
+  // Fuel dump shutoff logic with bingo fuel 
+  if((bingoNumber >= internalFuelNumber) && dumpValue){
+    sprintf((char*)data, "DUMP %d", 0);
+    muxBus.send(6, data, strlen((char*)data));
+    dumpValue = false;
+  }
+
+  //cutoff crank switch 15 seconds after nozzle reaches 70%
+
+  if(rightNozzle >= 49000 && crankSw == 2){
+    if(!hold){
+      startTime = millis();
+      hold = true;
+    }
+    if(((millis() - startTime) >= delayOff) && hold){
+      sprintf((char*)data, "CRNK %d", 1);
+      muxBus.send(5, data, strlen((char*)data));
+      hold = false;
+    }
+  }
+
+  if(leftNozzle >= 49000 && crankSw == 0){
+    if(!hold){
+      startTime = millis();
+      hold = true;
+    }
+    if(((millis() - startTime) >= delayOff) && hold){
+      sprintf((char*)data, "CRNK %d", 1);
+      muxBus.send(5, data, strlen((char*)data));
+      hold = false;
+    }
+  }
 }
 
 //  -- END OF FILE --

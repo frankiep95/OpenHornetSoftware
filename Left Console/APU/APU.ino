@@ -67,9 +67,7 @@
  * serial interface
  * 
  */
-
-
-#define MUXADDRESS 6
+#define MUXADDRESS 5
 #define DCSBIOS_MUX_SERIAL
 #include "DcsBios.h"
 #ifdef __AVR__
@@ -77,21 +75,26 @@
 #endif
 
 
+#define APU_SW1 15
+#define APU_LAMP 6
+#define CRANK_SW1 14
+#define CRANK_SW2 7
+#define FCS_CH1 16
+#define FCS_CH2 8
+#define LCSPDBRK 10
+#define LCLBAR 9
+#define APU_COIL 2
+#define CRANK_COIL 3
 
-// Define pins for DCS-BIOS per interconnect diagram.
-#define PROBE_SW1 15 
-#define PROBE_SW2 6 
-#define WING_SW1  14
-#define WING_SW2  7
-#define CTR_SW1   16
-#define CTR_SW2   8
-#define DUMP_SW1  10
-#define COIL1     2
 
-DcsBios::Switch3Pos probeSw("PROBE_SW", PROBE_SW2, PROBE_SW1);
-DcsBios::Switch3Pos extWngTankSw("EXT_WNG_TANK_SW", WING_SW2, WING_SW1);
-DcsBios::Switch3Pos extCntTankSw("EXT_CNT_TANK_SW", CTR_SW2, CTR_SW1);
-DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
+DcsBios::Switch2Pos apuControlSw("APU_CONTROL_SW", APU_SW1);
+
+DcsBios::Switch3Pos engineCrankSw("ENGINE_CRANK_SW", CRANK_SW2, CRANK_SW1);
+
+DcsBios::Switch2Pos cbFcsChan1("CB_FCS_CHAN1", FCS_CH1);
+DcsBios::Switch2Pos cbFcsChan2("CB_FCS_CHAN2", FCS_CH2);
+DcsBios::Switch2Pos cbLaunchBar("CB_LAUNCH_BAR", LCLBAR);
+DcsBios::Switch2Pos cbSpdBrk("CB_SPD_BRK", LCSPDBRK);
 
 /**
 * Arduino Setup Function
@@ -101,8 +104,14 @@ DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
 */
 void setup() {
 
-pinMode(COIL1, OUTPUT);
-digitalWrite(COIL1, LOW);
+pinMode(APU_COIL,OUTPUT);
+pinMode(CRANK_COIL,OUTPUT);
+pinMode(APU_LAMP,OUTPUT);
+digitalWrite(APU_COIL,LOW);
+digitalWrite(CRANK_COIL,LOW);
+digitalWrite(APU_LAMP,LOW);
+
+
   // Run DCS Bios setup function
   DcsBios::setup();
 }
@@ -113,11 +122,11 @@ digitalWrite(COIL1, LOW);
 * Arduino standard Loop Function. Code who should be executed
 * over and over in a loop, belongs in this function.
 */
-unsigned int value = 0;
 void loop() {
 
   //Run DCS Bios loop function
   DcsBios::loop();
+
   checkSwitches();
 
 
@@ -127,8 +136,27 @@ void checkSwitches(){
   if(DcsBios::CheckBus()){
     String add = DcsBios::getAddress();
     unsigned int value = DcsBios::getAmount();
-    if(add == "DUMP"){
-      outputDebounce(COIL1,value,100);
+    if(add == "APU1"){
+      outputDebounce(APU_COIL,value,100);
+
+      if(value == 0){
+         outputDebounce(CRANK_COIL,LOW,100); // also kill the crank switches
+      }
+    }
+    if(add == "CRNK"){
+      if(value == 1){
+        outputDebounce(CRANK_COIL,LOW,100);    
+      }
+      if(value == 0 || value == 2){
+        outputDebounce(CRANK_COIL,HIGH,100);
+      }
+    }
+    if(add == "APLT"){
+      digitalWrite(APU_LAMP,value);
+      if(value == 0){
+         outputDebounce(CRANK_COIL,LOW,100); // also kill the crank switches
+         outputDebounce(APU_COIL,LOW,100); // kill the APU
+      }         
     }
   }
 }

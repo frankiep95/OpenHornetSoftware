@@ -117,8 +117,8 @@ DcsBios::IntegerBuffer flpLgFullFlapsLtBuffer(FA_18C_hornet_FLP_LG_FULL_FLAPS_LT
 void onFlpLgFlapsLtChange(unsigned int newValue) {
   if(newValue > 0){newValue = 100;}
   // int flapsLEDS[2] ={84,85};
-  STATION_SELECT_LEDS[29] = CHSV(100,255,newValue);
-  STATION_SELECT_LEDS[30] = CHSV(100,255,newValue);
+  STATION_SELECT_LEDS[29] = CHSV(60,255,newValue);
+  STATION_SELECT_LEDS[30] = CHSV(60,255,newValue);
   BackLighting::updateLeftLipLEDS(NUM_STATION_SELECT_LEDS,STATION_SELECT_OFFSET,STATION_SELECT_LEDS);}
 DcsBios::IntegerBuffer flpLgFlapsLtBuffer(FA_18C_hornet_FLP_LG_FLAPS_LT, onFlpLgFlapsLtChange);
 

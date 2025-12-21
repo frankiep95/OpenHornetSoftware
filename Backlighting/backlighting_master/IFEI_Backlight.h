@@ -12,7 +12,7 @@ CRGB IFEI_LEDS[NUM_IFEI_LEDS];
 
 void UpdateIFEIBacklightLEDS(int value){
   BackLighting::updateBacklight(value, IFEI_LED_LIST,NUM_IFEI_LEDS,IFEI_LEDS);
-    BackLighting::updateLeftLipLEDS(NUM_IFEI_LEDS,IFEI_OFFSET,IFEI_LEDS);
+  BackLighting::updateLeftLipLEDS(NUM_IFEI_LEDS,IFEI_OFFSET,IFEI_LEDS);
 }
 
 

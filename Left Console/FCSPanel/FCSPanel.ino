@@ -68,30 +68,29 @@
  * 
  */
 
-
-#define MUXADDRESS 6
+#define MUXADDRESS 5
 #define DCSBIOS_MUX_SERIAL
 #include "DcsBios.h"
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
 
+#define TO_SW1 15
+#define RUD_TRIM_A A8
+#define RESET_SW1 10
+#define GAIN_SW1 9
+#define RUD_TRIM_SPD 6
+#define RUD_TRIM_DIR_A 14
+#define RUD_TRIM_DIR_B 7
 
 
-// Define pins for DCS-BIOS per interconnect diagram.
-#define PROBE_SW1 15 
-#define PROBE_SW2 6 
-#define WING_SW1  14
-#define WING_SW2  7
-#define CTR_SW1   16
-#define CTR_SW2   8
-#define DUMP_SW1  10
-#define COIL1     2
 
-DcsBios::Switch3Pos probeSw("PROBE_SW", PROBE_SW2, PROBE_SW1);
-DcsBios::Switch3Pos extWngTankSw("EXT_WNG_TANK_SW", WING_SW2, WING_SW1);
-DcsBios::Switch3Pos extCntTankSw("EXT_CNT_TANK_SW", CTR_SW2, CTR_SW1);
-DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
+DcsBios::Switch2Pos toTrimBtn("TO_TRIM_BTN", TO_SW1);
+DcsBios::Switch2Pos fcsResetBtn("FCS_RESET_BTN",RESET_SW1 );
+DcsBios::Potentiometer rudTrim("RUD_TRIM", RUD_TRIM_A);
+DcsBios::SwitchWithCover2Pos gainSwitch("GAIN_SWITCH","GAIN_SWITCH_COVER",GAIN_SW1 );
+
+
 
 /**
 * Arduino Setup Function
@@ -101,8 +100,13 @@ DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
 */
 void setup() {
 
-pinMode(COIL1, OUTPUT);
-digitalWrite(COIL1, LOW);
+  pinMode(RUD_TRIM_SPD, OUTPUT);
+  pinMode(RUD_TRIM_DIR_A, OUTPUT);
+  pinMode(RUD_TRIM_DIR_B, OUTPUT);
+  digitalWrite(RUD_TRIM_SPD,LOW);
+  digitalWrite(RUD_TRIM_DIR_A,LOW);
+  digitalWrite(RUD_TRIM_DIR_B,LOW);
+
   // Run DCS Bios setup function
   DcsBios::setup();
 }
@@ -113,38 +117,23 @@ digitalWrite(COIL1, LOW);
 * Arduino standard Loop Function. Code who should be executed
 * over and over in a loop, belongs in this function.
 */
-unsigned int value = 0;
 void loop() {
 
   //Run DCS Bios loop function
   DcsBios::loop();
-  checkSwitches();
 
-
+  // checkPos();
 }
 
-void checkSwitches(){
-  if(DcsBios::CheckBus()){
-    String add = DcsBios::getAddress();
-    unsigned int value = DcsBios::getAmount();
-    if(add == "DUMP"){
-      outputDebounce(COIL1,value,100);
-    }
-  }
-}
 
-void outputDebounce(uint8_t pin, unsigned int value, int delay ){
-  bool blockUpdate = false;
-  unsigned long elapsedTime = 0;
-
-  if(!blockUpdate){
-    elapsedTime  = millis();
-    blockUpdate = true;
-    digitalWrite(pin,value);
+void checkPos(){
+  if(RUD_TRIM_A > 130){
+    digitalWrite(RUD_TRIM_SPD, HIGH);
+    digitalWrite(RUD_TRIM_DIR_A,HIGH);
   }
-  else{
-    if ((millis-elapsedTime) > delay){
-        blockUpdate = false;
-    }
+  else if(RUD_TRIM_A > 130){
+    digitalWrite(RUD_TRIM_SPD, HIGH);
+    digitalWrite(RUD_TRIM_DIR_A,HIGH);
   }
+  else digitalWrite(RUD_TRIM_SPD,LOW);
 }

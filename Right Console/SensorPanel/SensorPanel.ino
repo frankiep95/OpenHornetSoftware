@@ -67,8 +67,6 @@
  * serial interface
  * 
  */
-
-
 #define MUXADDRESS 6
 #define DCSBIOS_MUX_SERIAL
 #include "DcsBios.h"
@@ -76,22 +74,33 @@
 #include <avr/power.h>
 #endif
 
+#include "2A4A1-RWR_CONTROL_PANEL.h"
 
 
-// Define pins for DCS-BIOS per interconnect diagram.
-#define PROBE_SW1 15 
-#define PROBE_SW2 6 
-#define WING_SW1  14
-#define WING_SW2  7
-#define CTR_SW1   16
-#define CTR_SW2   8
-#define DUMP_SW1  10
-#define COIL1     2
+#define FLIR_ON A3
+#define FLIR_OFF A2
+#define LTDR_ARM 3
+#define RDR_STBY A1
+#define RDR_OPR 4
+#define RDR_EMERG A0
+#define LST_ON 15
+#define INS_CV 6
+#define INS_GND 14
+#define INS_NAV 7
+#define INS_IFA 16
+#define INS_GYRO 8
+#define INS_GB 10
+#define INS_TEST 9
+#define LTDR_COIL 2
 
-DcsBios::Switch3Pos probeSw("PROBE_SW", PROBE_SW2, PROBE_SW1);
-DcsBios::Switch3Pos extWngTankSw("EXT_WNG_TANK_SW", WING_SW2, WING_SW1);
-DcsBios::Switch3Pos extCntTankSw("EXT_CNT_TANK_SW", CTR_SW2, CTR_SW1);
-DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
+
+DcsBios::Switch3Pos flirSw("FLIR_SW", FLIR_OFF, FLIR_ON);
+DcsBios::Switch2Pos ltdRSw("LTD_R_SW", LTDR_ARM);
+const byte radarSwPins[4] = {DcsBios::PIN_NC, RDR_STBY, RDR_OPR, RDR_EMERG};
+SwitchMultiPosDebounce radarSw("RADAR_SW", radarSwPins, 4,false,100);
+DcsBios::Switch2Pos lstNflrSw("LST_NFLR_SW", LST_ON);
+const byte insSwPins[8] = {DcsBios::PIN_NC, INS_CV, INS_GND, INS_NAV, INS_IFA, INS_GYRO, INS_GB, INS_TEST};
+SwitchMultiPosDebounce insSw("INS_SW", insSwPins, 8,false,100);
 
 /**
 * Arduino Setup Function
@@ -100,9 +109,8 @@ DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
 * only once at the programm start, belongs in this function.
 */
 void setup() {
-
-pinMode(COIL1, OUTPUT);
-digitalWrite(COIL1, LOW);
+pinMode(LTDR_COIL,OUTPUT);
+digitalWrite(LTDR_COIL,LOW);
   // Run DCS Bios setup function
   DcsBios::setup();
 }
@@ -113,22 +121,21 @@ digitalWrite(COIL1, LOW);
 * Arduino standard Loop Function. Code who should be executed
 * over and over in a loop, belongs in this function.
 */
-unsigned int value = 0;
 void loop() {
-
   //Run DCS Bios loop function
   DcsBios::loop();
   checkSwitches();
 
-
+  radarSw.pollThisInput();
+  insSw.pollThisInput();
 }
 
 void checkSwitches(){
   if(DcsBios::CheckBus()){
     String add = DcsBios::getAddress();
     unsigned int value = DcsBios::getAmount();
-    if(add == "DUMP"){
-      outputDebounce(COIL1,value,100);
+    if(add == "LTDR"){
+      outputDebounce(LTDR_COIL,value,100);
     }
   }
 }

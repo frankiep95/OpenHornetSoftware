@@ -83,15 +83,15 @@ void onLhAdvRecChange(unsigned int newValue) {
 
 void onLhAdvLBarGreenChange(unsigned int newValue) {
   if(newValue > 0){newValue = 255;}
-  LEWI_LEDS[22] = CHSV(100,255,newValue);
-  LEWI_LEDS[23] = CHSV(100,255,newValue);
+  LEWI_LEDS[24] = CHSV(100,255,newValue);
+  LEWI_LEDS[25] = CHSV(100,255,newValue);
   BackLighting::updateUIPLEDS(NUM_LEWI_LEDS,LEWI_OFFSET,LEWI_LEDS);
 }DcsBios::IntegerBuffer lhAdvLBarGreenBuffer(FA_18C_hornet_LH_ADV_L_BAR_GREEN, onLhAdvLBarGreenChange);
 
 void onLhAdvLBarRedChange(unsigned int newValue) {
   if(newValue > 0){newValue = 255;}
-  LEWI_LEDS[24] = CHSV(0,255,newValue);
-  LEWI_LEDS[25] = CHSV(0,255,newValue);
+  LEWI_LEDS[22] = CHSV(0,255,newValue);
+  LEWI_LEDS[23] = CHSV(0,255,newValue);
   BackLighting::updateUIPLEDS(NUM_LEWI_LEDS,LEWI_OFFSET,LEWI_LEDS);
 }DcsBios::IntegerBuffer lhAdvLBarRedBuffer(FA_18C_hornet_LH_ADV_L_BAR_RED, onLhAdvLBarRedChange);
 

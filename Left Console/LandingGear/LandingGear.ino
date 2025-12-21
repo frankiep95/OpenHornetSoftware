@@ -142,14 +142,9 @@ void loop() {
   //Run DCS Bios loop function
   DcsBios::loop();
 
-  DcsBios::CheckBus("");
+  checkSwitches();
 
-  keyAndValue_t data = {DcsBios::getAddress(),DcsBios::getAmount()};
-  if(data.key != ""){
-    if(data.key == "LGLT"){
-      digitalWrite(LG_LED,data.amount);
-    }
-  }
+
 
 /**
 * ### Landing Gear Down Lock Logic
@@ -172,4 +167,15 @@ void loop() {
   // } else {  //gear handle up, turn off solenoid
   //   digitalWrite(LG_LEVER_SOLENOID, LOW);
   // }
+}
+
+void checkSwitches(){
+  if(DcsBios::CheckBus()){
+    String add = DcsBios::getAddress();
+    unsigned int value = DcsBios::getAmount();
+    if(add == "LGLT"){
+      digitalWrite(LG_LED,value);
+    }
+
+  }
 }

@@ -94,6 +94,16 @@
 const uint8_t sendPin = 5;
 const uint8_t deviceID = 0;
 uint8_t data[32];
+unsigned int pst1;
+unsigned int pst2;
+unsigned int pst3;
+unsigned int pst1Old;
+unsigned int pst2Old;
+unsigned int pst3Old;
+unsigned int alt10K;
+unsigned int alt10KOld;
+unsigned int alt1K;
+unsigned int alt1KOld;
 
 RS485 muxBus(&Serial1, sendPin, deviceID);
 
@@ -131,6 +141,54 @@ void onVsiChange(unsigned int newValue) {
 }
 DcsBios::IntegerBuffer vsiBuffer(FA_18C_hornet_VSI, onVsiChange);
 
+void onStbyPressSet0Change(unsigned int value) {
+  unsigned int adjustedValue = value + 3277;
+  int newValue = adjustedValue/6553;
+  pst1 = newValue;
+}
+DcsBios::IntegerBuffer stbyPressSet0Buffer(FA_18C_hornet_STBY_PRESS_SET_0, onStbyPressSet0Change);
+
+void onStbyPressSet1Change(unsigned int value) {
+  unsigned int adjustedValue = value + 3277;
+  int newValue = adjustedValue/6553;
+  pst2 = newValue;
+}
+DcsBios::IntegerBuffer stbyPressSet1Buffer(FA_18C_hornet_STBY_PRESS_SET_1, onStbyPressSet1Change);
+
+void onStbyPressSet2Change(unsigned int newValue) {
+
+  switch(newValue){
+    case 26214:
+      pst3 = 28;
+      break;
+    case 39321:
+      pst3 = 29;
+      break;
+    case 52428:
+      pst3 = 30;
+      break;
+    case 65535:
+      pst3 = 31;
+      break;
+  }
+
+}
+DcsBios::IntegerBuffer stbyPressSet2Buffer(FA_18C_hornet_STBY_PRESS_SET_2, onStbyPressSet2Change);
+
+void onStbyAlt10000FtCntChange(unsigned int value) {
+  unsigned int adjustedValue = value + 3277;
+  int newValue = adjustedValue/6553;
+  alt10K = newValue;
+}
+DcsBios::IntegerBuffer stbyAlt10000FtCntBuffer(FA_18C_hornet_STBY_ALT_10000_FT_CNT, onStbyAlt10000FtCntChange);
+
+void onStbyAlt1000FtCntChange(unsigned int value) {
+  unsigned int adjustedValue = value + 3277;
+  int newValue = adjustedValue/6553;
+  alt1K = newValue;
+}
+DcsBios::IntegerBuffer stbyAlt1000FtCntBuffer(FA_18C_hornet_STBY_ALT_1000_FT_CNT, onStbyAlt1000FtCntChange);
+
 unsigned int newValue = 0;
 unsigned int val2 = 0;
 unsigned int val3 = 0;
@@ -149,11 +207,43 @@ uint8_t len;
 
 void loop() {
   DcsBios::loop();
+  updateBaro();
+  updateAlt();
 
   if(muxBus.receive(ID,buffer,len)){
     buffer[len] = 0;
     Serial.println((char*) buffer);
   }
+}
+
+void updateBaro(){
+
+  if((pst1 != pst1Old) || (pst2 != pst2Old) || (pst3 != pst3Old)){
+
+    int fullValue = (pst3 * 100) + (pst2 * 10) + pst1;
+
+    sprintf((char*)data, "BARO %d", fullValue);
+    muxBus.send(5, data, strlen((char*)data));
+
+    pst1Old = pst1;
+    pst2Old = pst2;
+    pst3Old = pst3;
+
+  }
+}
+
+void updateAlt(){
+
+  if((alt10K != alt10KOld) || (alt1K != alt1KOld)){
+
+    int fullValue = (alt10K * 10) + alt1K;
+
+    sprintf((char*)data, "BALT %d", fullValue);
+    muxBus.send(5, data, strlen((char*)data));
+    alt10KOld = alt10K;
+    alt1KOld = alt1K;
+  }
+
 }
 
 //  -- END OF FILE --

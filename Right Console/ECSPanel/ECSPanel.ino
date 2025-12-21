@@ -67,31 +67,51 @@
  * serial interface
  * 
  */
-
-
-#define MUXADDRESS 6
+#define MUXADDRESS 4
 #define DCSBIOS_MUX_SERIAL
 #include "DcsBios.h"
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
 
+#include "2A4A1-RWR_CONTROL_PANEL.h"
 
 
-// Define pins for DCS-BIOS per interconnect diagram.
-#define PROBE_SW1 15 
-#define PROBE_SW2 6 
-#define WING_SW1  14
-#define WING_SW2  7
-#define CTR_SW1   16
-#define CTR_SW2   8
-#define DUMP_SW1  10
-#define COIL1     2
+#define M_AUTO A3
+#define M_OFF A2
+#define CP_NORM A1
+#define CP_RAM 4
+#define PITOT_ON A0
+#define ENG_ON 15
+#define ENG_TEST 6
+#define BA_AUG 14
+#define BA_ROFF 7
+#define BA_OFF 16
+#define BA_LOFF 8
+#define TS_A A10
+#define TC_A A9
 
-DcsBios::Switch3Pos probeSw("PROBE_SW", PROBE_SW2, PROBE_SW1);
-DcsBios::Switch3Pos extWngTankSw("EXT_WNG_TANK_SW", WING_SW2, WING_SW1);
-DcsBios::Switch3Pos extCntTankSw("EXT_CNT_TANK_SW", CTR_SW2, CTR_SW1);
-DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
+#define PITOT_COIL 2
+#define AUG_COIL 3
+
+DcsBios::Switch3Pos ecsModeSw("ECS_MODE_SW",M_AUTO , M_OFF);
+
+DcsBios::Switch3Pos cabinPressSw("CABIN_PRESS_SW", CP_RAM, CP_NORM);
+
+DcsBios::Switch2Pos pitotHeatSw("PITOT_HEAT_SW", PITOT_ON);
+
+DcsBios::Switch3Pos engAntiiceSw("ENG_ANTIICE_SW", ENG_ON, ENG_TEST);
+
+DcsBios::Switch2Pos bleedAirPull("BLEED_AIR_PULL", BA_AUG,1);
+
+const byte bleedAirKnobPins[4] = {DcsBios::PIN_NC, BA_ROFF, BA_OFF, BA_LOFF};SwitchMultiPosDebounce bleedAirKnob("BLEED_AIR_KNOB", bleedAirKnobPins, 4);
+
+DcsBios::Potentiometer cabinTemp("CABIN_TEMP", TC_A);
+
+DcsBios::Potentiometer suitTemp("SUIT_TEMP", TS_A);
+
+
+
 
 /**
 * Arduino Setup Function
@@ -101,8 +121,13 @@ DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
 */
 void setup() {
 
-pinMode(COIL1, OUTPUT);
-digitalWrite(COIL1, LOW);
+pinMode(PITOT_COIL,OUTPUT);
+pinMode(AUG_COIL,OUTPUT);
+digitalWrite(PITOT_COIL,LOW);
+digitalWrite(AUG_COIL,LOW);
+
+
+
   // Run DCS Bios setup function
   DcsBios::setup();
 }
@@ -113,22 +138,25 @@ digitalWrite(COIL1, LOW);
 * Arduino standard Loop Function. Code who should be executed
 * over and over in a loop, belongs in this function.
 */
-unsigned int value = 0;
 void loop() {
 
   //Run DCS Bios loop function
   DcsBios::loop();
+
   checkSwitches();
 
-
+  bleedAirKnob.pollThisInput();
 }
 
 void checkSwitches(){
   if(DcsBios::CheckBus()){
     String add = DcsBios::getAddress();
     unsigned int value = DcsBios::getAmount();
-    if(add == "DUMP"){
-      outputDebounce(COIL1,value,100);
+    if(add == "PTOT"){
+      outputDebounce(PITOT_COIL,value,500);
+    }
+    if(add == "AUGC"){
+      outputDebounce(AUG_COIL,value,500);
     }
   }
 }
@@ -147,4 +175,7 @@ void outputDebounce(uint8_t pin, unsigned int value, int delay ){
         blockUpdate = false;
     }
   }
+
+
+
 }

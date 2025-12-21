@@ -84,7 +84,7 @@
 #define BRKP_M3 A2
 #define BRKP_M4 A1
 #define BRKP_DIN 3
-#define FIRE_SW1 6
+#define FIRE_SW1 4
 #define FIRE_SW2 A0
 #define BRKH_SECURE 15
 #define BRKH_EMERG 6
@@ -115,6 +115,12 @@ void setup() {
     // Run DCS Bios setup function
   DcsBios::setup();
 
+pinMode(BRKH_EMERG,INPUT);
+pinMode(BRKH_PARK,INPUT);
+pinMode(BRKH_SECURE,INPUT);
+digitalWrite(BRKH_EMERG,HIGH);
+digitalWrite(BRKH_PARK, HIGH);
+digitalWrite(BRKH_SECURE,HIGH);
 
 }
 
@@ -127,83 +133,44 @@ void setup() {
 unsigned int value = 0;
 void loop() {
 
-
-check();
-delay(1000);
-  
   //Run DCS Bios loop function
   DcsBios::loop();
 //  value = DcsBios::CheckBus("74b4");
   // Brake Handle Logic:
-  // bool eBrkSwitchState = !digitalRead(BRKH_EMERG);  // read the emergency brake switch state
-  // bool pBrkSwitchState = !digitalRead(BRKH_PARK);   // read the parking brake switch state
+  bool eBrkSwitchState = !digitalRead(BRKH_EMERG);  // read the emergency brake switch state
+  bool pBrkSwitchState = !digitalRead(BRKH_PARK);   // read the parking brake switch state
 
-  // switch (brakeState) {                                           // brakeState = 1:Park, 2:Emergency, or 0:Off
-  //   case 0:                                                       // brakeState == 0, brakes are off determine if pulled and which direction
-  //     if (eBrkSwitchState) == 1 {                                 // Emerg brake switch state == 1, Brake handle pulled for emergency brake
-  //       sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_PULL", "0");  // DcsBios message to pull handle
-  //       brakeState = 2;                                           // Update brake state to emergency brakes applied
-  //     }
-  //     if (pBrkSwitchState) == 1 {                                   // Parking brake switch state == 1, brake handle pulled for parking brake
-  //       sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_ROTATE", "1");  // Rotate parking brake handle to parking / vertical position
-  //       delay(50);
-  //       sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_PULL", "0");  // DcsBios message to pull handle
-  //       brakeState = 1;                                           // Update brake state to parking brakes applied
-  //     }
-  //     break;
-  //   case 1:                                                         // brakeState == 1, Parking brake on
-  //     if (pBrkSwitchState) == 0 {                                   // Parking brake switch state == 0, brake handle pushed in
-  //       sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_ROTATE", "2");  // DcsBios message to rotate the brake handle to the 'release' position (not modeled in the physical pit)
-  //       delay(50);                                                  // delay for the animation to complete
-  //       sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_PULL", "1");    // DcsBios message to push the brake handle in
-  //       delay(50);                                                  // delay for the animation to complete
-  //       sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_ROTATE", "0");  // DcsBios message to rotate the brake handle to the emergency / horizontal position
-  //       brakeState = 0;                                             // Update brake state to off
-  //     }
-  //     break;
-  //   case 2:                                                       // brakeState == 2, Emergency brake on
-  //     if (eBrkSwitchState) == 0 {                                 // Emergency brake swtich state == 0, brake handle pushed in
-  //       sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_PULL", "1");  // DcsBios message to push the brake handle in
-  //       brakeState = 0;                                           // Update brake state to off
-  //     }
-  //     break;
-  // }
+  switch (brakeState) {                                           // brakeState = 1:Park, 2:Emergency, or 0:Off
+    case 0:                                                       // brakeState == 0, brakes are off determine if pulled and which direction
+      if ((eBrkSwitchState) == 1) {                                 // Emerg brake switch state == 1, Brake handle pulled for emergency brake
+        sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_PULL", "0");  // DcsBios message to pull handle
+        brakeState = 2;                                           // Update brake state to emergency brakes applied
+      }
+      if ((pBrkSwitchState) == 1) {   
+        // Parking brake switch state == 1, brake handle pulled for parking brake
+        sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_ROTATE", "1");  // Rotate parking brake handle to parking / vertical position
+        delay(50);
+        sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_PULL", "0");  // DcsBios message to pull handle
+        brakeState = 1;                                           // Update brake state to parking brakes applied
+      }
+      break;
+    case 1:                                                         // brakeState == 1, Parking brake on
+      if ((pBrkSwitchState) == 0) {                                   // Parking brake switch state == 0, brake handle pushed in
+        sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_ROTATE", "2");  // DcsBios message to rotate the brake handle to the 'release' position (not modeled in the physical pit)
+        delay(50);                                                  // delay for the animation to complete
+        sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_PULL", "1");    // DcsBios message to push the brake handle in
+        delay(50);                                                  // delay for the animation to complete
+        sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_ROTATE", "0");  // DcsBios message to rotate the brake handle to the emergency / horizontal position
+        brakeState = 0;                                             // Update brake state to off
+      }
+      break;
+    case 2:                                                       // brakeState == 2, Emergency brake on
+      if ((eBrkSwitchState) == 0) {                                 // Emergency brake swtich state == 0, brake handle pushed in
+        sendDcsBiosMessage("EMERGENCY_PARKING_BRAKE_PULL", "1");  // DcsBios message to push the brake handle in
+        brakeState = 0;                                           // Update brake state to off
+      }
+      break;
+  }
 }
 
-void check(){
 
-  
-  if(digitalRead(FIRE_SW1)==1){
-    Serial.println("FIRE 1 HIGH");
-  }
-  if(digitalRead(FIRE_SW1) == 0){
-    Serial.println("FIRE 1 LOW");
-  }
-  if(digitalRead(FIRE_SW2) == 1){
-    Serial.println("FIRE 2 HIGH");
-  }
-  if(digitalRead(FIRE_SW2) == 0){
-    Serial.println("FIRE 2 LOW");
-  }
-
-    if(digitalRead(BRKH_SECURE) == 1){
-    Serial.println("Brake secure HIGH");
-  }
-  if(digitalRead(BRKH_SECURE) == 0){
-    Serial.println("Brake secure LOW");
-  }
-
-    if(digitalRead(BRKH_EMERG) == 1){
-    Serial.println("BRKH_EMERG HIGH");
-  }
-  if(digitalRead(BRKH_EMERG) == 0){
-    Serial.println("BRKH_EMERGe LOW");
-  }
-
-    if(digitalRead(BRKH_PARK) == 1){
-    Serial.println("BRKH_PARK HIGH");
-  }
-  if(digitalRead(BRKH_PARK) == 0){
-    Serial.println("BRKH_PARK LOW");
-  }
-}

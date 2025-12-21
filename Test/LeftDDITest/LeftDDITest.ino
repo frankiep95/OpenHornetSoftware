@@ -82,14 +82,9 @@
 // #define DCSBIOS_DEFAULT_SERIAL  ///< This enables the default serial communication for DCS-BIOS. (Used with all other microcontrollers than the ATmega328P or ATmega2560.)
 // #endif
 
-#define MUXADDRESS 4
-#define MUXPIN 5
+#define MUXADDRESS 2
 #define DCSBIOS_MUX_SERIAL
-
-#include <DcsBios.h>
-#include "Arduino.h"
-#include "RS485.h"
-
+#include "DcsBios.h"
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
@@ -108,19 +103,19 @@
 
 // Define pins per the OH Interconnect.
 
-#define RDDI_ROT_DAY A0 ///< LDDI Rotary - Day
-#define RDDI_ROT_NIGHT A1 ///< LDDI Rotary - Night
-#define RDDI_ROT_OFF A2 ///< LDDI Rotary - Off
-#define RDDI_BRT_A A6 ///< LDDI Brightness Encoder A
-#define RDDI_BRT_B 7 ///< LDDI Brightness Encoder B
-#define RDDI_CONT_A 8 ///< LDDI Contrast Encoder A
-#define RDDI_CONT_B A10 ///< LDDI Contrast Encoder B
-#define REWI_FIRE_SW 14 ///< LEWI Fire
-#define REWI_APU_FIRE_SW 16 ///< LEWI Master Caution
+#define LDDI_ROT_DAY A0 ///< LDDI Rotary - Day
+#define LDDI_ROT_NIGHT A1 ///< LDDI Rotary - Night
+#define LDDI_ROT_OFF A2 ///< LDDI Rotary - Off
+#define LDDI_BRT_A A6 ///< LDDI Brightness Encoder A
+#define LDDI_BRT_B 7 ///< LDDI Brightness Encoder B
+#define LDDI_CONT_A 8 ///< LDDI Contrast Encoder A
+#define LDDI_CONT_B A10 ///< LDDI Contrast Encoder B
+#define LEWI_FIRE_SW 14 ///< LEWI Fire
+#define LEWI_MC_SW 16 ///< LEWI Master Caution
 #define DDI_BACK_LIGHT 9  ///< DDI Backlighting PWM, must be defined as digital pin #
 #define DDI_IRQ 6         ///< AMPCD IRQ Pin
 
-RS485 muxBus(&Serial1, 5, 4);
+RS485 muxBus(&Serial1, 5, 2);
 
 
 /**
@@ -147,13 +142,13 @@ int index;
 
 
 //Connect switches to DCS-BIOS
-DcsBios::RotaryEncoder rightDdiBrtCtl("RIGHT_DDI_BRT_CTL", "-3200", "+3200", RDDI_BRT_A, RDDI_BRT_B);
-DcsBios::RotaryEncoder rightDdiContCtl("RIGHT_DDI_CONT_CTL", "-3200", "+3200", RDDI_CONT_A, RDDI_CONT_B);
-DcsBios::Switch2Pos apuFireBtn("APU_FIRE_BTN", REWI_APU_FIRE_SW);
-DcsBios::SwitchWithCover2Pos rightFireBtn("RIGHT_FIRE_BTN", "RIGHT_FIRE_BTN_COVER", REWI_FIRE_SW);
+DcsBios::RotaryEncoder leftDdiBrtCtl("LEFT_DDI_BRT_CTL", "-3200", "+3200", LDDI_BRT_A, LDDI_BRT_B);
+DcsBios::RotaryEncoder leftDdiContCtl("LEFT_DDI_CONT_CTL", "-3200", "+3200", LDDI_CONT_A, LDDI_CONT_B);
+DcsBios::Switch2Pos masterCautionResetSw("MASTER_CAUTION_RESET_SW", LEWI_MC_SW);
+DcsBios::SwitchWithCover2Pos leftFireBtn("LEFT_FIRE_BTN", "LEFT_FIRE_BTN_COVER", LEWI_FIRE_SW);
 
-const byte rightDdiBrtSelectPins[3] = { RDDI_ROT_OFF, RDDI_ROT_NIGHT, RDDI_ROT_DAY };
-DcsBios::SwitchMultiPos rightDdiBrtSelect("RIGHT_DDI_BRT_SELECT", rightDdiBrtSelectPins, 3);
+const byte leftDdiBrtSelectPins[3] = { LDDI_ROT_OFF, LDDI_ROT_NIGHT, LDDI_ROT_DAY };
+DcsBios::SwitchMultiPos leftDdiBrtSelect("LEFT_DDI_BRT_SELECT", leftDdiBrtSelectPins, 3);
 
 
 /**
@@ -204,20 +199,17 @@ void setup() {
 * 
 * @attention If AMPCD button output flickers increase debounceDelay.
 */
-
-
-
 uint8_t id;
 uint8_t buffer[32];
 uint8_t length;
 int value;
+
 
 void loop() {
 
   //Run DCS Bios loop function
   DcsBios::loop();
   checkBus();
-
 
 
   /**
@@ -255,7 +247,7 @@ void loop() {
           buttonState[index] = btnState;
             // int btnNum = 4 - j + 5 * i;
             char btnName[14];
-            sprintf(btnName, "RIGHT_DDI_PB_%02d", index + 1);
+            sprintf(btnName, "LEFT_DDI_PB_%02d", index + 1);
             // Serial.println(btnName);
             DcsBios::sendDcsBiosMessage(btnName, btnState == 1 ? "0" : "1");
         }
@@ -264,7 +256,6 @@ void loop() {
     }
   }
 }
-
 
 void checkBus() {
   if (muxBus.receive(id, buffer, length)) {

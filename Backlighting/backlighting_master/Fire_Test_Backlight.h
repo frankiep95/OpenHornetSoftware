@@ -1,0 +1,20 @@
+#ifndef __FIRE_TEST_H
+#define __FIRE_TEST_H
+
+
+
+#define NUM_FIRE_TEST_LEDS 10
+
+int FIRE_TEST_OFFSET = NUM_SELECT_JETT_LEDS + SELECT_JETT_OFFSET;
+
+int FIRE_TEST_LED_LIST[NUM_FIRE_TEST_LEDS] = {0,1,2,3,4,5,6,7,8,9};
+
+CRGB FIRE_TEST_LEDS[NUM_FIRE_TEST_LEDS];
+
+void UpdateFireTestBacklightLEDS(int value){
+  BackLighting::updateBacklight(value, FIRE_TEST_LED_LIST,NUM_FIRE_TEST_LEDS,FIRE_TEST_LEDS);
+  BackLighting::updateLCLEDS(NUM_FIRE_TEST_LEDS,FIRE_TEST_OFFSET,FIRE_TEST_LEDS);
+}
+
+
+#endif

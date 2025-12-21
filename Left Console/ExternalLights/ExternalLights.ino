@@ -69,7 +69,9 @@
  */
 
 
-#define MUXADDRESS 6
+
+
+#define MUXADDRESS 4
 #define DCSBIOS_MUX_SERIAL
 #include "DcsBios.h"
 #ifdef __AVR__
@@ -77,21 +79,25 @@
 #endif
 
 
+#define FORM_A A3
+#define STROBE_SW1 2
+#define POSI_A A2
+#define STROBE_SW2 3
+#define INTRW_SW1 A1
+#define GENTIE_SW1 4
+#define DISP_SW1 A0
 
-// Define pins for DCS-BIOS per interconnect diagram.
-#define PROBE_SW1 15 
-#define PROBE_SW2 6 
-#define WING_SW1  14
-#define WING_SW2  7
-#define CTR_SW1   16
-#define CTR_SW2   8
-#define DUMP_SW1  10
-#define COIL1     2
+DcsBios::Potentiometer formationDimmer("FORMATION_DIMMER", FORM_A,true);
 
-DcsBios::Switch3Pos probeSw("PROBE_SW", PROBE_SW2, PROBE_SW1);
-DcsBios::Switch3Pos extWngTankSw("EXT_WNG_TANK_SW", WING_SW2, WING_SW1);
-DcsBios::Switch3Pos extCntTankSw("EXT_CNT_TANK_SW", CTR_SW2, CTR_SW1);
-DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
+DcsBios::Switch3Pos strobeSw("STROBE_SW", STROBE_SW2, STROBE_SW1);
+
+DcsBios::Potentiometer positionDimmer("POSITION_DIMMER", POSI_A,true);
+
+DcsBios::Switch2Pos intWngTankSw("INT_WNG_TANK_SW", INTRW_SW1);
+
+DcsBios::SwitchWithCover2Pos genTieSw("GEN_TIE_SW","GEN_TIE_COVER", GENTIE_SW1);
+
+DcsBios::Switch2Pos cmsdDispenseBtn("CMSD_DISPENSE_BTN", DISP_SW1);
 
 /**
 * Arduino Setup Function
@@ -101,8 +107,6 @@ DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
 */
 void setup() {
 
-pinMode(COIL1, OUTPUT);
-digitalWrite(COIL1, LOW);
   // Run DCS Bios setup function
   DcsBios::setup();
 }
@@ -113,38 +117,9 @@ digitalWrite(COIL1, LOW);
 * Arduino standard Loop Function. Code who should be executed
 * over and over in a loop, belongs in this function.
 */
-unsigned int value = 0;
 void loop() {
 
   //Run DCS Bios loop function
   DcsBios::loop();
-  checkSwitches();
-
-
 }
 
-void checkSwitches(){
-  if(DcsBios::CheckBus()){
-    String add = DcsBios::getAddress();
-    unsigned int value = DcsBios::getAmount();
-    if(add == "DUMP"){
-      outputDebounce(COIL1,value,100);
-    }
-  }
-}
-
-void outputDebounce(uint8_t pin, unsigned int value, int delay ){
-  bool blockUpdate = false;
-  unsigned long elapsedTime = 0;
-
-  if(!blockUpdate){
-    elapsedTime  = millis();
-    blockUpdate = true;
-    digitalWrite(pin,value);
-  }
-  else{
-    if ((millis-elapsedTime) > delay){
-        blockUpdate = false;
-    }
-  }
-}

@@ -67,31 +67,36 @@
  * serial interface
  * 
  */
-
-
-#define MUXADDRESS 6
+#define MUXADDRESS 2
 #define DCSBIOS_MUX_SERIAL
 #include "DcsBios.h"
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
 
+#define COIL1 A3
+#define COIL2 2
+#define COIL3 A2
+#define COIL4 3
+#define COIL5 A1
+#define COIL6 4
+#define COIL7 A0
+#define COIL8 15
+#define WF_UNLOCK 6
+#define WF_FOLD 14
+#define WF_SPREAD 7
+#define AVC_SW 16
+#define HOOK_SW 8
+#define HOOK_IND_1 10
+#define HOOK_IND_2 9
 
 
-// Define pins for DCS-BIOS per interconnect diagram.
-#define PROBE_SW1 15 
-#define PROBE_SW2 6 
-#define WING_SW1  14
-#define WING_SW2  7
-#define CTR_SW1   16
-#define CTR_SW2   8
-#define DUMP_SW1  10
-#define COIL1     2
+DcsBios::Switch2Pos wingFoldPull("WING_FOLD_PULL", WF_UNLOCK,1);
+DcsBios::Switch3Pos wingFoldRotate("WING_FOLD_ROTATE", WF_FOLD, WF_SPREAD);
+DcsBios::Switch2Pos avCoolSw("AV_COOL_SW", AVC_SW,1);
+DcsBios::Switch2Pos hookLever("HOOK_LEVER", HOOK_SW,1);
 
-DcsBios::Switch3Pos probeSw("PROBE_SW", PROBE_SW2, PROBE_SW1);
-DcsBios::Switch3Pos extWngTankSw("EXT_WNG_TANK_SW", WING_SW2, WING_SW1);
-DcsBios::Switch3Pos extCntTankSw("EXT_CNT_TANK_SW", CTR_SW2, CTR_SW1);
-DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
+
 
 /**
 * Arduino Setup Function
@@ -101,8 +106,11 @@ DcsBios::Switch2Pos fuelDumpSw("FUEL_DUMP_SW", DUMP_SW1);
 */
 void setup() {
 
-pinMode(COIL1, OUTPUT);
-digitalWrite(COIL1, LOW);
+pinMode(HOOK_IND_1,OUTPUT);
+pinMode(HOOK_IND_2,OUTPUT);
+
+
+
   // Run DCS Bios setup function
   DcsBios::setup();
 }
@@ -113,11 +121,11 @@ digitalWrite(COIL1, LOW);
 * Arduino standard Loop Function. Code who should be executed
 * over and over in a loop, belongs in this function.
 */
-unsigned int value = 0;
 void loop() {
 
   //Run DCS Bios loop function
   DcsBios::loop();
+
   checkSwitches();
 
 
@@ -127,24 +135,10 @@ void checkSwitches(){
   if(DcsBios::CheckBus()){
     String add = DcsBios::getAddress();
     unsigned int value = DcsBios::getAmount();
-    if(add == "DUMP"){
-      outputDebounce(COIL1,value,100);
+    if(add == "HKLT"){
+      digitalWrite(HOOK_IND_1,value);
+      digitalWrite(HOOK_IND_1,value);
     }
-  }
-}
 
-void outputDebounce(uint8_t pin, unsigned int value, int delay ){
-  bool blockUpdate = false;
-  unsigned long elapsedTime = 0;
-
-  if(!blockUpdate){
-    elapsedTime  = millis();
-    blockUpdate = true;
-    digitalWrite(pin,value);
-  }
-  else{
-    if ((millis-elapsedTime) > delay){
-        blockUpdate = false;
-    }
   }
 }

@@ -31,11 +31,13 @@
 #define LEFT_LIP_NUM_LEDS 96
 #define LIP_NUM_LEDS 113
 #define UIP_NUM_LEDS 191
+#define LC_NUM_LEDS 163
 
 
 CRGBArray<LEFT_LIP_NUM_LEDS> LEFT_LIP_LEDS;
 CRGBArray<LIP_NUM_LEDS> LIP_LEDS;
 CRGBArray<UIP_NUM_LEDS> UIP_LEDS;
+CRGBArray<LC_NUM_LEDS> LC_LEDS;
 
 
 typedef struct LedArrays_
@@ -49,6 +51,7 @@ int NUM_LEDS = 0;
 }
 
 namespace BackLighting{
+
 
 void updateBacklight(unsigned int newValue, int * testleds, unsigned int ledCount, CRGB * theLEDS){
   int value = 0;
@@ -80,19 +83,64 @@ void updateUIPLEDS(int numLEDS,int offset, CRGB * theLEDS){
  FastLED.show();
 }
 
+void updateLCLEDS(int numLEDS, int offset, CRGB * theLEDS){
+  for(int a = 0; a < numLEDS; a++){
+    LC_LEDS[a + offset] = theLEDS[a];
+  }
+  FastLED.show();
 }
 
+}
+//LEFT LIP (LIP_CH1)
 #include "IFEI_Backlight.h"
 #include "Video_Recorder_Backlight.h"
 #include "Station_Select_Backlight.h"
 #include "Jett_Placard_Backlight.h"
+//LIP (LIP_CH2)
 #include "RWR_Control_Backlight.h"
 #include "ECM_Dispense_Backlight.h"
 #include "Cabin_Pressure_Backlight.h"
+#include "Standby_Instruments_Backlight.h"
+//UIP (CH1)
 #include "Master_Arm_Backlight.h"
 #include "LEWI_Backlight.h"
-#include "Hud_Panel_Backlighting.h"
+#include "Hud_Panel_Backlight.h"
 #include "REWI_Backlight.h"
-#include "Spin_Recovery_Backlighting.h"
+#include "Spin_Recovery_Backlight.h"
+//LC (LC_CH1)
+#include "Landing_Gear_backlight.h"
+// #include "Select_Jett_backlight.h"
+// #include "Fire_Test_Backlight.h"
+// #include "Sim_Power_Backlight.h"
+// #include "Gen_Tie_Backlight.h"
+// #include "Ext_Lights_backlight.h"
+// fuel panel leds 32
+
+
+//LC (LC_CH2)
+//apu leds 19
+//fcs leds 22
+// comm leds 109
+//ant sel leds 17
+//obogs leds 16
+//hyd isol leds 24
+
+//RC (RC_CH1)
+//ldg checklist leds 24
+// radalt leds 2
+// hyd press leds 41
+// caution panel leds 24
+//av cool leds 13
+// elec leds 24
+// batt gauge leds 41
+// defog panel leds 22
+
+// RC (RC_CH2)
+// ecs leds 63
+// intr lt leds 65
+// snsr leds 58
+// sim control leds 61
+// ky58 leds 79
+
 
 #endif
