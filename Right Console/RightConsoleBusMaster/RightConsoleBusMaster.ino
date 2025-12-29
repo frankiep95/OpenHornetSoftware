@@ -63,11 +63,32 @@
 #include "Arduino.h"
 #include "RS485.h"
 
+// #include "Joystick.h"
+
 const uint8_t sendPin = 5;
 const uint8_t deviceID = 0;
 uint8_t data[32];
 
 RS485 muxBus(&Serial1, sendPin, deviceID);
+
+
+
+// Joystick_ Joystick = Joystick_(
+//   0x4910,
+//   JOYSTICK_TYPE_JOYSTICK,
+//   0,
+//   0,
+//   true,
+//   false,
+//   false,
+//   false,
+//   false,
+//   false,
+//   false,
+//   false,
+//   false,
+//   false,
+//   false);
 
 
 // #define LBAR_SW_AUTORETRACT false
@@ -179,17 +200,31 @@ RS485 muxBus(&Serial1, sendPin, deviceID);
 //   rpmR = atoi(newValue);
 // } DcsBios::StringBuffer<3> ifeiRpmRBuffer(0x74a2, onIfeiRpmRChange);
 
-// void onExtWowLeftChange(unsigned int newValue) {
-//   wowLeft = newValue;
-// } DcsBios::IntegerBuffer extWowLeftBuffer(0x74d8, 0x0100, 8, onExtWowLeftChange);
+void onExtWowLeftChange(unsigned int newValue) {
+    sprintf((char*)data, "WOWL %d", newValue);
+    muxBus.send(9, data, strlen((char*)data));
+} DcsBios::IntegerBuffer extWowLeftBuffer(0x74d8, 0x0100, 8, onExtWowLeftChange);
 
-// void onExtWowNoseChange(unsigned int newValue) {
-//   wowNose = newValue;
-// } DcsBios::IntegerBuffer extWowNoseBuffer(0x74d6, 0x4000, 14, onExtWowNoseChange);
+void onExtWowNoseChange(unsigned int newValue) {
+    sprintf((char*)data, "WOWN %d", newValue);
+    muxBus.send(9, data, strlen((char*)data));
+} DcsBios::IntegerBuffer extWowNoseBuffer(0x74d6, 0x4000, 14, onExtWowNoseChange);
 
-// void onExtWowRightChange(unsigned int newValue) {
-//   wowRight = newValue;
-// } DcsBios::IntegerBuffer extWowRightBuffer(0x74d6, 0x8000, 15, onExtWowRightChange);
+void onExtWowRightChange(unsigned int newValue) {
+    sprintf((char*)data, "WOWR %d", newValue);
+    muxBus.send(9, data, strlen((char*)data));
+} DcsBios::IntegerBuffer extWowRightBuffer(0x74d6, 0x8000, 15, onExtWowRightChange);
+
+void onCanopyPosChange(unsigned int newValue) {
+    sprintf((char*)data, "CANP %d", newValue);
+    muxBus.send(9, data, strlen((char*)data));
+} DcsBios::IntegerBuffer canopyPosBuffer(0x7552, 0xffff, 0, onCanopyPosChange);
+
+
+void onCanopySwChange(unsigned int newValue) {
+    sprintf((char*)data, "CANS %d", newValue);
+    muxBus.send(9, data, strlen((char*)data));
+} DcsBios::IntegerBuffer canopySwBuffer(0x74ce, 0x0300, 8, onCanopySwChange);
 
 
 // unsigned int newValue = 0;
@@ -241,6 +276,9 @@ void setup() {
   while (!Serial1) {}
   DcsBios::setup();
 
+  // Joystick.begin();
+  // Joystick.setXAxisRange(0, 1024);
+
 }
 uint8_t ID;
 uint8_t buffer[50];
@@ -254,6 +292,18 @@ void loop() {
     buffer[len] = 0;
     Serial.println((char*) buffer);
   }
+
+  // if(DcsBios::CheckBus()){
+  //   String add = DcsBios::getAddress();
+  //   unsigned int value = DcsBios::getAmount();
+  //   if(add == "JOYX"){
+  //     Joystick.setXAxis(analogRead(value));  // Set the defog lever position.
+  //   }
+  //   else
+  //   Serial.println(DcsBios::getBuffer());
+  // }
+
+
 
 /**
  ### Launch Bar Auto Retract Logic
@@ -306,5 +356,7 @@ void loop() {
   // }
 
 }
+
+
 
 //  -- END OF FILE --

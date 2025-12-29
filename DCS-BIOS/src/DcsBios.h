@@ -217,6 +217,10 @@ namespace DcsBios
 	unsigned int getAmount(){
 		return _data.amount;
 	}
+	String getBuffer(){
+ 		return (char *)inBuffer;
+	}
+
 	bool tryToSendDcsBiosMessage(const char *msg, const char *arg)
 	{
 		sprintf((char *)buffer, "%s %s\n", msg, arg);
