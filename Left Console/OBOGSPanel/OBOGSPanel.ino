@@ -99,7 +99,7 @@
 #define OXY_MSG "OXY_FLOW"     ///< DCSBios Message to move the OXY_FLOW knob.
 #define MAX_FLOW "+65535"      ///< The OXY FLOW knob in the sim is a 90 degree pot, with max = 65535 we'll add the full on value.
 #define MIN_FLOW "-65535"      ///< The OXY FLOW Knob in the sim is a 90 degree pot, with min = 0 we'll subtract the full on value.
-#define REVERSE_OXY_FLOW true  ///< If OXY FLOW knob rotates in the opposite direction in the sim compared to the physical switch then change this to false.
+#define REVERSE_OXY_FLOW false  ///< If OXY FLOW knob rotates in the opposite direction in the sim compared to the physical switch then change this to false.
 
 bool lastBtnState = LOW;             ///< Last button state for oxy flow logic, initialize to off.
 bool buttonDebounceState = LOW;      ///< Button debounce state for oxy flow logic.

@@ -152,7 +152,7 @@ namespace DcsBios
 namespace DcsBios
 {
 	uint8_t buffer[32];
-	RS485 muxBus(MEGAMUX ? &Serial : &Serial1,MUXPIN,MUXADDRESS);
+	RS485 muxBus(MEGAMUX ? &Serial : static_cast<Stream*>(&Serial1),MUXPIN,MUXADDRESS);
 
 	ProtocolParser parser;
 	int count = 0;
@@ -162,9 +162,7 @@ namespace DcsBios
 		Serial.begin(250000);
 		if(MEGAMUX == false){
 			Serial1.begin(250000);
-			while (!Serial1)
-			{
-			};
+			while (!Serial1){};
 		}
 	}
 	void loop()
