@@ -63,6 +63,9 @@
 #include "Arduino.h"
 #include "RS485.h"
 
+#include "Keyboard.h"
+
+
 // #include "Joystick.h"
 
 const uint8_t sendPin = 5;
@@ -275,6 +278,8 @@ void setup() {
   Serial1.begin(250000);
   while (!Serial1) {}
   DcsBios::setup();
+
+  Keyboard.begin();
 
   // Joystick.begin();
   // Joystick.setXAxisRange(0, 1024);

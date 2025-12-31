@@ -90,9 +90,13 @@
 
 DcsBios::Switch2Pos radaltTestSw("RADALT_TEST_SW", TEST);
 
+unsigned int heightSetting = 0;
 
+// DcsBios::Potentiometer radaltHeight("RADALT_HEIGHT", ALT_SETTING, 538,429);
+DcsBios::setStateInput radaltHeight("RADALT_HEIGHT", heightSetting);
+DcsBios:: 
 
-// DcsBios::Potentiometer radaltHeight("RADALT_HEIGHT", ALT_SETTING/100);
+// DcsBios::RotaryEncoder radaltHeight("RADALT_HEIGHT", "-3200", "+3200", PIN_A, PIN_B);
 
 OpenHornetGauge Altitude(COIL1,COIL2,COIL3,COIL4,0);
 Servo offFlag;
@@ -127,13 +131,16 @@ void setup() {
 void loop() {
   //Run DCS Bios loop function
   DcsBios::loop();
+  radaltHeight.pollThisInput();
   // checkSwitches();
   // unsigned int value = 30000; 
+  // unsigned int value = map(analogRead(ALT_SETTING),538,429,0,65535);
   // DcsBios::tryToSendDcsBiosMessage("RADALT_HEIGHT", value);
 //    value = value + 1000;
 //  delay(1000); 
-checkSerial();
-Altitude.updatePos();
+// checkSerial();
+// Altitude.updatePos();
+// Serial.println(value);
 }
 
 void checkSerial(){
