@@ -35,6 +35,10 @@
 #define MUXPIN 5
 #endif
 
+#ifndef MEGAMUX
+#define MEGAMUX false
+#endif
+
 namespace DcsBios
 {
 	const unsigned char PIN_NC = 0xFF;
@@ -148,17 +152,20 @@ namespace DcsBios
 namespace DcsBios
 {
 	uint8_t buffer[32];
-	RS485 muxBus(&Serial1, MUXPIN, MUXADDRESS);
+	RS485 muxBus(MEGAMUX ? &Serial : &Serial1,MUXPIN,MUXADDRESS);
+
 	ProtocolParser parser;
 	int count = 0;
 
 	void setup()
 	{
-		Serial1.begin(250000);
-		while (!Serial1)
-		{
-		}
 		Serial.begin(250000);
+		if(MEGAMUX == false){
+			Serial1.begin(250000);
+			while (!Serial1)
+			{
+			};
+		}
 	}
 	void loop()
 	{
@@ -170,62 +177,30 @@ namespace DcsBios
 	uint8_t inBuffer[32];
 	uint8_t length;
 	unsigned int value;
-	typedef struct keyAndValue_
+
+	unsigned int CheckBus(String _address)
 	{
-		String key;
-		unsigned int amount;
-	} keyAndValue_t;
-
-	keyAndValue_t _data = {"",0};
-	bool CheckBus()
-	{	String address = "";
-		String string = "";
-		String data = "";
-		_data.key ="";
-		_data.amount = 0;
-		value = 0;
-		inBuffer[32] = 0;
-		length = 0;
-		if (muxBus.available())
+		if (muxBus.receive(id, inBuffer, length))
 		{
-			muxBus.receive(id, inBuffer, length);
+			// Serial.println("Got Message From ");
+			Serial.println(id);
 			inBuffer[length] = 0;
-			string = (char *)inBuffer;
-			address = string.substring(0, 4);
-			data = string.substring(5, string.length());
-			value = data.toInt();
-			_data.key = address;
-			_data.amount = value;			
-			address = "";
-			string = "";
-			data = "";
-			return true;
+			String string = (char *)inBuffer;
+			String address = string.substring(0, 4);
+			if (address.equals(_address))
+			{
+				// Serial.println("Got address");
+				String data = string.substring(4, string.length());
+				value = data.toInt();
+			}
 		}
-
-		if (Serial.available()){
-			String address = Serial.readStringUntil(',');
-			String thevalue = Serial.readStringUntil('\n');
-			_data.key = address;
-			_data.amount = thevalue.toInt();
-			return true;
-		}else return false;
-	}
-	String getAddress(){
-		return _data.key;
-	}
-
-	unsigned int getAmount(){
-		return _data.amount;
-	}
-	String getBuffer(){
- 		return (char *)inBuffer;
+		return value;
 	}
 
 	bool tryToSendDcsBiosMessage(const char *msg, const char *arg)
 	{
 		sprintf((char *)buffer, "%s %s\n", msg, arg);
 		muxBus.send(0, buffer, strlen((char *)buffer));
-		Serial.println((char*)buffer);
 		// muxBus.write(msg); muxBus.write(' '); muxBus.write(arg); muxBus.write('\n');
 		DcsBios::PollingInput::setMessageSentOrQueued();
 		return true;
