@@ -77,14 +77,6 @@
 #include <avr/power.h>
 #endif
 
-/**
- * The Arduino pin that is connected to the
- * RE and DE pins on the RS-485 transceiver.
-*/
-#define TXENABLE_PIN 5  ///< Sets TXENABLE_PIN to Arduino Pin 5
-#define UART1_SELECT    ///< Selects UART1 on Arduino for serial communication
-
-#include "DcsBios.h"
 
 
 // Define pins for DCS-BIOS per interconnect diagram.

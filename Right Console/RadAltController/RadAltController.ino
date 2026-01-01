@@ -69,6 +69,7 @@
  */
 #define MUXADDRESS 6
 #define DCSBIOS_MUX_SERIAL
+#define MUXPIN 4
 #include "DcsBios.h"
 #ifdef __AVR__
 #include <avr/power.h>
@@ -86,20 +87,38 @@
 #define GRN_LED 9
 #define TEST 2
 #define OFF_FLAG 5 //89 for show 30 for dissappear
-#define ALT_SETTING A0
+#define ALT_SETTING1 A0
+#define ALT_SETTING2 A1
 
 DcsBios::Switch2Pos radaltTestSw("RADALT_TEST_SW", TEST);
+DcsBios::RotaryEncoder radaltHeight("RADALT_HEIGHT", "-1024", "+1024", ALT_SETTING1, ALT_SETTING2);
 
-unsigned int heightSetting = 0;
 
-// DcsBios::Potentiometer radaltHeight("RADALT_HEIGHT", ALT_SETTING, 538,429);
-DcsBios::setStateInput radaltHeight("RADALT_HEIGHT", heightSetting);
-DcsBios:: 
+// OpenHornetGauge Altitude(COIL1,COIL2,COIL3,COIL4,0);
 
-// DcsBios::RotaryEncoder radaltHeight("RADALT_HEIGHT", "-3200", "+3200", PIN_A, PIN_B);
+// Servo offFlag;
 
-OpenHornetGauge Altitude(COIL1,COIL2,COIL3,COIL4,0);
-Servo offFlag;
+// void onLowAltWarnLtChange(unsigned int newValue) {
+//       digitalWrite(RED_LED,newValue);
+//   }
+// DcsBios::IntegerBuffer lowAltWarnLtBuffer(FA_18C_hornet_LOW_ALT_WARN_LT, onLowAltWarnLtChange);
+
+// void onRadaltGreenLampChange(unsigned int newValue) {
+//       digitalWrite(GRN_LED,newValue);
+//   }
+// DcsBios::IntegerBuffer radaltGreenLampBuffer(FA_18C_hornet_RADALT_GREEN_LAMP, onRadaltGreenLampChange);
+
+// void onRadaltOffFlagChange(unsigned int newValue) {
+//       if(newValue > 30000){
+//         offFlag.write(89);
+//       }
+//       if(newValue < 30000){
+//         offFlag.write(30);
+//       }
+//   }
+// DcsBios::IntegerBuffer radaltOffFlagBuffer(FA_18C_hornet_RADALT_OFF_FLAG, onRadaltOffFlagChange);
+
+
 
 /**
 * Arduino Setup Function
@@ -110,14 +129,17 @@ Servo offFlag;
 void setup() {
   // offFlag.attach(OFF_FLAG);
   // Run DCS Bios setup function
+  // pinMode(GRN_LED, OUTPUT);
+  // pinMode(RED_LED, OUTPUT);
+  // digitalWrite(RED_LED,LOW);
+  // digitalWrite(GRN_LED,LOW);
+
   DcsBios::setup();
 
-  Altitude.setMotorSpeed(1400);
-  Altitude.setRotationDegrees(315);
-  Altitude.home();
-  // Altitude.command(30000);
-  Altitude.command(50000);
-  Serial.println("Enter a position: ");
+  // Altitude.setMotorSpeed(1400);
+  // Altitude.setRotationDegrees(315);
+
+
 }
 
 /**
@@ -131,61 +153,46 @@ void setup() {
 void loop() {
   //Run DCS Bios loop function
   DcsBios::loop();
-  radaltHeight.pollThisInput();
   // checkSwitches();
-  // unsigned int value = 30000; 
-  // unsigned int value = map(analogRead(ALT_SETTING),538,429,0,65535);
-  // DcsBios::tryToSendDcsBiosMessage("RADALT_HEIGHT", value);
-//    value = value + 1000;
-//  delay(1000); 
-// checkSerial();
 // Altitude.updatePos();
-// Serial.println(value);
+
 }
 
-void checkSerial(){
-  if(Serial.available()){
-    String value = Serial.readStringUntil('\n');
-    int newValue = value.toInt();
-    unsigned int theValue = map(newValue,0,255,0,65535);
-    Serial.println(theValue);
-    Altitude.command(theValue);
-  }
-}
 
-void checkSwitches(){
-  if(DcsBios::CheckBus()){
-    String add = DcsBios::getAddress();
-    unsigned int value = DcsBios::getAmount();
-    if(add == "FLAG"){
-      if(value > 30000){
-        offFlag.write(89);
-      }
-      if(value < 30000){
-        offFlag.write(30);
-      }
-    }
-    if(add == "LEDR"){
-      digitalWrite(RED_LED,value);
-    }
-    if(add == "LEDG"){
-      digitalWrite(GRN_LED,value);
-    }
-  }
-}
 
-void outputDebounce(uint8_t pin, unsigned int value, int delay ){
-  bool blockUpdate = false;
-  unsigned long elapsedTime = 0;
+// void checkSwitches(){
+//   if(DcsBios::CheckBus()){
+//     String add = DcsBios::getAddress();
+//     unsigned int value = DcsBios::getAmount();
+//     if(add == "FLAG"){
+//       if(value > 30000){
+//         offFlag.write(89);
+//       }
+//       if(value < 30000){
+//         offFlag.write(30);
+//       }
+//     }
+//     if(add == "LEDR"){
+//       digitalWrite(RED_LED,value);
+//     }
+//     if(add == "LEDG"){
+//       digitalWrite(GRN_LED,value);
+//     }
+//   }
+// }
 
-  if(!blockUpdate){
-    elapsedTime  = millis();
-    blockUpdate = true;
-    digitalWrite(pin,value);
-  }
-  else{
-    if ((millis-elapsedTime) > delay){
-        blockUpdate = false;
-    }
-  }
-}
+// void outputDebounce(uint8_t pin, unsigned int value, int delay ){
+//   bool blockUpdate = false;
+//   unsigned long elapsedTime = 0;
+
+//   if(!blockUpdate){
+//     elapsedTime  = millis();
+//     blockUpdate = true;
+//     digitalWrite(pin,value);
+//   }
+//   else{
+//     if ((millis-elapsedTime) > delay){
+//         blockUpdate = false;
+//     }
+//   }
+// }
