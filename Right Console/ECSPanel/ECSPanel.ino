@@ -104,8 +104,8 @@ DcsBios::Switch3Pos engAntiiceSw("ENG_ANTIICE_SW", ENG_ON, ENG_TEST);
 
 DcsBios::Switch2Pos bleedAirPull("BLEED_AIR_PULL", BA_AUG,1);
 
-const byte bleedAirKnobPins[4] = {DcsBios::PIN_NC, BA_ROFF, BA_OFF, BA_LOFF};
-SwitchMultiPosDebounce bleedAirKnob("BLEED_AIR_KNOB", bleedAirKnobPins, 4);
+const byte bleedAirKnobPins[4] = {BA_OFF, BA_ROFF, DcsBios::PIN_NC, BA_LOFF};
+SwitchMultiPosDebounce bleedAirKnob("BLEED_AIR_KNOB", bleedAirKnobPins, 4,0,200);
 
 DcsBios::Potentiometer cabinTemp("CABIN_TEMP", TC_A);
 

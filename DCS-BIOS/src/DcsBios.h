@@ -175,26 +175,53 @@ namespace DcsBios
 	uint8_t inBuffer[32];
 	uint8_t length;
 	unsigned int value;
-
-	unsigned int CheckBus(String _address)
+	typedef struct keyAndValue_
 	{
-		if (muxBus.receive(id, inBuffer, length))
+		String key;
+		unsigned int amount;
+	} keyAndValue_t;
+
+	keyAndValue_t _data = {"",0};
+	bool CheckBus()
+	{	String address = "";
+		String string = "";
+		String data = "";
+		_data.key ="";
+		_data.amount = 0;
+		value = 0;
+		inBuffer[32] = 0;
+		length = 0;
+		if (muxBus.available())
 		{
-			// Serial.println("Got Message From ");
-			Serial.println(id);
+			muxBus.receive(id, inBuffer, length);
 			inBuffer[length] = 0;
-			String string = (char *)inBuffer;
-			String address = string.substring(0, 4);
-			if (address.equals(_address))
-			{
-				// Serial.println("Got address");
-				String data = string.substring(4, string.length());
-				value = data.toInt();
-			}
+			string = (char *)inBuffer;
+			address = string.substring(0, 4);
+			data = string.substring(5, string.length());
+			value = data.toInt();
+			_data.key = address;
+			_data.amount = value;			
+			address = "";
+			string = "";
+			data = "";
+			return true;
 		}
-		return value;
+
+		if (Serial.available()){
+			String address = Serial.readStringUntil(',');
+			String thevalue = Serial.readStringUntil('\n');
+			_data.key = address;
+			_data.amount = thevalue.toInt();
+			return true;
+		}else return false;
+	}
+	String getAddress(){
+		return _data.key;
 	}
 
+	unsigned int getAmount(){
+		return _data.amount;
+	}
 	bool tryToSendDcsBiosMessage(const char *msg, const char *arg)
 	{
 		sprintf((char *)buffer, "%s %s\n", msg, arg);
