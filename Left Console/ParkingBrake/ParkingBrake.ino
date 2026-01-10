@@ -96,7 +96,7 @@ byte brakeState = 1;  ///< brakeState = 1:Park, 2:Emergency, or 0:Off
 // DcsBios::Switch2Pos emergencyParkingBrakePull("EMERGENCY_PARKING_BRAKE_PULL", PIN);
 // const byte emergencyParkingBrakeRotatePins[3] = {PIN_0, PIN_1, PIN_2};DcsBios::SwitchMultiPos emergencyParkingBrakeRotate("EMERGENCY_PARKING_BRAKE_ROTATE", emergencyParkingBrakeRotatePins, 3);
 
-DcsBios::Switch3Pos fireTestSw("FIRE_TEST_SW", FIRE_SW1, FIRE_SW2);
+DcsBios::Switch3Pos fireTestSw("FIRE_TEST_SW", FIRE_SW2, FIRE_SW1);
 
 
 

@@ -88,8 +88,8 @@
 #define BA_ROFF 7
 #define BA_OFF 16
 #define BA_LOFF 8
-#define TS_A A10
-#define TC_A A9
+#define TS_A A9
+#define TC_A A10
 
 #define PITOT_COIL 2
 #define AUG_COIL 3
