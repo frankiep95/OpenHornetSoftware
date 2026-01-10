@@ -94,29 +94,9 @@ DcsBios::Switch2Pos radaltTestSw("RADALT_TEST_SW", TEST);
 DcsBios::RotaryEncoder radaltHeight("RADALT_HEIGHT", "-1024", "+1024", ALT_SETTING1, ALT_SETTING2);
 
 
-// OpenHornetGauge Altitude(COIL1,COIL2,COIL3,COIL4,0);
+OpenHornetGauge Altitude(COIL1,COIL2,COIL3,COIL4,0);
 
-// Servo offFlag;
-
-// void onLowAltWarnLtChange(unsigned int newValue) {
-//       digitalWrite(RED_LED,newValue);
-//   }
-// DcsBios::IntegerBuffer lowAltWarnLtBuffer(FA_18C_hornet_LOW_ALT_WARN_LT, onLowAltWarnLtChange);
-
-// void onRadaltGreenLampChange(unsigned int newValue) {
-//       digitalWrite(GRN_LED,newValue);
-//   }
-// DcsBios::IntegerBuffer radaltGreenLampBuffer(FA_18C_hornet_RADALT_GREEN_LAMP, onRadaltGreenLampChange);
-
-// void onRadaltOffFlagChange(unsigned int newValue) {
-//       if(newValue > 30000){
-//         offFlag.write(89);
-//       }
-//       if(newValue < 30000){
-//         offFlag.write(30);
-//       }
-//   }
-// DcsBios::IntegerBuffer radaltOffFlagBuffer(FA_18C_hornet_RADALT_OFF_FLAG, onRadaltOffFlagChange);
+Servo offFlag;
 
 
 
@@ -127,17 +107,18 @@ DcsBios::RotaryEncoder radaltHeight("RADALT_HEIGHT", "-1024", "+1024", ALT_SETTI
 * only once at the programm start, belongs in this function.
 */
 void setup() {
-  // offFlag.attach(OFF_FLAG);
-  // Run DCS Bios setup function
-  // pinMode(GRN_LED, OUTPUT);
-  // pinMode(RED_LED, OUTPUT);
-  // digitalWrite(RED_LED,LOW);
-  // digitalWrite(GRN_LED,LOW);
+  offFlag.attach(OFF_FLAG);
+  offFlag.write(84);
+  pinMode(GRN_LED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+  digitalWrite(RED_LED,LOW);
+  digitalWrite(GRN_LED,LOW);
 
+  // Run DCS Bios setup function
   DcsBios::setup();
 
-  // Altitude.setMotorSpeed(1400);
-  // Altitude.setRotationDegrees(315);
+  Altitude.setMotorSpeed(1400);
+  Altitude.setRotationDegrees(315);
 
 
 }
@@ -153,33 +134,36 @@ void setup() {
 void loop() {
   //Run DCS Bios loop function
   DcsBios::loop();
-  // checkSwitches();
-// Altitude.updatePos();
+  checkSwitches();
+  Altitude.updatePos();
 
 }
 
 
 
-// void checkSwitches(){
-//   if(DcsBios::CheckBus()){
-//     String add = DcsBios::getAddress();
-//     unsigned int value = DcsBios::getAmount();
-//     if(add == "FLAG"){
-//       if(value > 30000){
-//         offFlag.write(89);
-//       }
-//       if(value < 30000){
-//         offFlag.write(30);
-//       }
-//     }
-//     if(add == "LEDR"){
-//       digitalWrite(RED_LED,value);
-//     }
-//     if(add == "LEDG"){
-//       digitalWrite(GRN_LED,value);
-//     }
-//   }
-// }
+void checkSwitches(){
+  if(DcsBios::CheckBus()){
+    String add = DcsBios::getAddress();
+    unsigned int value = DcsBios::getAmount();
+    if(add == "FLAG"){
+      if(value > 30000){
+        offFlag.write(84);
+      }
+      if(value < 30000){
+        offFlag.write(30);
+      }
+    }
+    if(add == "LEDR"){
+      digitalWrite(RED_LED,value);
+    }
+    if(add == "LEDG"){
+      digitalWrite(GRN_LED,value);
+    }
+    if(add == "RALT"){
+      Altitude.command(value);
+    }
+  }
+}
 
 // void outputDebounce(uint8_t pin, unsigned int value, int delay ){
 //   bool blockUpdate = false;

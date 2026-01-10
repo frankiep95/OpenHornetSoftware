@@ -270,7 +270,25 @@ void onBleedAirPullChange(unsigned int newValue) {
     muxBus.send(4, data, strlen((char*)data)); 
 }DcsBios::IntegerBuffer bleedAirPullBuffer(FA_18C_hornet_BLEED_AIR_PULL, onBleedAirPullChange);
 
+void onLowAltWarnLtChange(unsigned int newValue) {
+    sprintf((char*)data, "LEDR %d", newValue);
+    muxBus.send(6, data, strlen((char*)data));
+}DcsBios::IntegerBuffer lowAltWarnLtBuffer(FA_18C_hornet_LOW_ALT_WARN_LT, onLowAltWarnLtChange);
 
+void onRadaltAltPtrChange(unsigned int newValue) {
+    sprintf((char*)data, "RALT %d", newValue);
+    muxBus.send(6, data, strlen((char*)data));
+}DcsBios::IntegerBuffer radaltAltPtrBuffer(FA_18C_hornet_RADALT_ALT_PTR, onRadaltAltPtrChange);
+
+void onRadaltGreenLampChange(unsigned int newValue) { 
+    sprintf((char*)data, "LEDG %d", newValue);
+    muxBus.send(6, data, strlen((char*)data));
+}DcsBios::IntegerBuffer radaltGreenLampBuffer(FA_18C_hornet_RADALT_GREEN_LAMP, onRadaltGreenLampChange);
+
+void onRadaltOffFlagChange(unsigned int newValue) {
+    sprintf((char*)data, "FLAG %d", newValue);
+    muxBus.send(6, data, strlen((char*)data));
+}DcsBios::IntegerBuffer radaltOffFlagBuffer(FA_18C_hornet_RADALT_OFF_FLAG, onRadaltOffFlagChange);
 
 void setup() {
   pinMode(17, OUTPUT);
