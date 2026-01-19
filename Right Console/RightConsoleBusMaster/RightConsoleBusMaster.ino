@@ -280,7 +280,7 @@ void onRadaltAltPtrChange(unsigned int newValue) {
     muxBus.send(6, data, strlen((char*)data));
 }DcsBios::IntegerBuffer radaltAltPtrBuffer(FA_18C_hornet_RADALT_ALT_PTR, onRadaltAltPtrChange);
 
-void onRadaltGreenLampChange(unsigned int newValue) { 
+void onRadaltGreenLampChange(unsigned int newValue) {
     sprintf((char*)data, "LEDG %d", newValue);
     muxBus.send(6, data, strlen((char*)data));
 }DcsBios::IntegerBuffer radaltGreenLampBuffer(FA_18C_hornet_RADALT_GREEN_LAMP, onRadaltGreenLampChange);
