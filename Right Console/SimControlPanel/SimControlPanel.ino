@@ -78,7 +78,7 @@
 // #define TXENABLE_PIN 5  ///< Sets TXENABLE_PIN to Arduino Pin 5
 // #define UART1_SELECT    ///< Selects UART1 on Arduino for serial communication
 
-// #include "Keyboard.h"
+#include "Keyboard.h"
 
 // Define pins for DCS-BIOS per interconnect diagram.
 #define VIEW_CHASE A3  ///< View Chase

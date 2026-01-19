@@ -92,6 +92,7 @@ DcsBios::Potentiometer consolesDimmer("CONSOLES_DIMMER", CONSOLES,1);
 DcsBios::Potentiometer instPnlDimmer("INST_PNL_DIMMER", INSTPNL,1);
 DcsBios::Potentiometer floodDimmer("FLOOD_DIMMER", FLOOD,1);
 
+
 /**
 * Arduino Setup Function
 *

@@ -83,12 +83,14 @@
 #define COIL2 10
 #define COIL3 16
 #define COIL4 14
-#define RED_LED 6
-#define GRN_LED 9
+#define RED_LED A7
+#define GRN_LED A9
 #define TEST 2
 #define OFF_FLAG 5 //89 for show 30 for dissappear
 #define ALT_SETTING1 A0
 #define ALT_SETTING2 A1
+
+unsigned int warningLTDimmer = 0;
 
 DcsBios::Switch2Pos radaltTestSw("RADALT_TEST_SW", TEST);
 DcsBios::RotaryEncoder radaltHeight("RADALT_HEIGHT", "-1024", "+1024", ALT_SETTING1, ALT_SETTING2);
@@ -109,10 +111,10 @@ Servo offFlag;
 void setup() {
   offFlag.attach(OFF_FLAG);
   offFlag.write(84);
-  pinMode(GRN_LED, OUTPUT);
-  pinMode(RED_LED, OUTPUT);
-  digitalWrite(RED_LED,LOW);
-  digitalWrite(GRN_LED,LOW);
+  // pinMode(GRN_LED, OUTPUT);
+  // pinMode(RED_LED, OUTPUT);
+  analogWrite(RED_LED,0);
+  analogWrite(GRN_LED,0);
 
   // Run DCS Bios setup function
   DcsBios::setup();
@@ -154,13 +156,23 @@ void checkSwitches(){
       }
     }
     if(add == "LEDR"){
-      digitalWrite(RED_LED,value);
+      if(value == 1){
+      analoglWrite(RED_LED,warningLTDimmer);
+      }
+      else analogWrite(RED_LED, 0)
     }
     if(add == "LEDG"){
-      digitalWrite(GRN_LED,value);
+      if(value == 1){
+      analoglWrite(GRN_LED,warningLTDimmer);
+      }
+      else analogWrite(GRN_LED, 0)
     }
     if(add == "RALT"){
       Altitude.command(value);
+    }
+    if(add == "WARN"){
+      unsigned int dimValue = map(value, 0,65536,50,255);
+        warningLTDimmer = dimValue;
     }
   }
 }
