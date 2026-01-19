@@ -78,6 +78,9 @@
 #include <OpenHornetGauge.h>
 #include <Servo.h>
 
+#include <FastLED.h>
+#define NUM_LEDS 2
+#define DATA_PIN 3
 
 #define COIL1 15
 #define COIL2 10
@@ -90,7 +93,9 @@
 #define ALT_SETTING1 A0
 #define ALT_SETTING2 A1
 
-unsigned int warningLTDimmer = 0;
+CRGB leds[NUM_LEDS];
+
+int warningLTDimmer = 0;
 
 DcsBios::Switch2Pos radaltTestSw("RADALT_TEST_SW", TEST);
 DcsBios::RotaryEncoder radaltHeight("RADALT_HEIGHT", "-1024", "+1024", ALT_SETTING1, ALT_SETTING2);
@@ -102,6 +107,8 @@ Servo offFlag;
 
 
 
+
+
 /**
 * Arduino Setup Function
 *
@@ -109,10 +116,13 @@ Servo offFlag;
 * only once at the programm start, belongs in this function.
 */
 void setup() {
+
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
+
   offFlag.attach(OFF_FLAG);
   offFlag.write(84);
-  // pinMode(GRN_LED, OUTPUT);
-  // pinMode(RED_LED, OUTPUT);
+  pinMode(GRN_LED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
   analogWrite(RED_LED,0);
   analogWrite(GRN_LED,0);
 
@@ -157,15 +167,15 @@ void checkSwitches(){
     }
     if(add == "LEDR"){
       if(value == 1){
-      analoglWrite(RED_LED,warningLTDimmer);
+        analogWrite(RED_LED,warningLTDimmer);
       }
-      else analogWrite(RED_LED, 0)
+      else analogWrite(RED_LED, 0);
     }
     if(add == "LEDG"){
       if(value == 1){
-      analoglWrite(GRN_LED,warningLTDimmer);
+        analogWrite(GRN_LED,warningLTDimmer);
       }
-      else analogWrite(GRN_LED, 0)
+      else analogWrite(GRN_LED, 0);
     }
     if(add == "RALT"){
       Altitude.command(value);
@@ -173,6 +183,15 @@ void checkSwitches(){
     if(add == "WARN"){
       unsigned int dimValue = map(value, 0,65536,50,255);
         warningLTDimmer = dimValue;
+    }
+    if(add == "BKLT"){
+      int scale = map(value,0,65535,0,255);
+      CRGB target = CRGB(25,155,0);
+      target.nscale8_video(scale);
+      leds[0] = target;
+      leds[1] = target;
+      FastLED.show();
+
     }
   }
 }

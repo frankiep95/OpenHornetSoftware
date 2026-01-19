@@ -289,11 +289,18 @@ void onRadaltOffFlagChange(unsigned int newValue) {
     sprintf((char*)data, "FLAG %d", newValue);
     muxBus.send(6, data, strlen((char*)data));
 }DcsBios::IntegerBuffer radaltOffFlagBuffer(FA_18C_hornet_RADALT_OFF_FLAG, onRadaltOffFlagChange);
+
 void onWarnCautionDimmerChange(unsigned int newValue) {
     sprintf((char*)data, "WARN %d", newValue);
     muxBus.send(6, data, strlen((char*)data));
 }
 DcsBios::IntegerBuffer warnCautionDimmerBuffer(0x754c, 0xffff, 0, onWarnCautionDimmerChange);
+
+void onInstPnlDimmerChange(unsigned int newValue) {
+    sprintf((char*)data, "BKLT %d", newValue);
+    muxBus.send(6, data, strlen((char*)data));
+}
+DcsBios::IntegerBuffer instPnlDimmerBuffer(0x7546, 0xffff, 0, onInstPnlDimmerChange);
 
 void setup() {
   pinMode(17, OUTPUT);
