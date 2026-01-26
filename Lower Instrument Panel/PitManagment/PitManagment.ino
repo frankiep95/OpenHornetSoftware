@@ -127,10 +127,19 @@ void setup() {
 * over and over in a loop, belongs in this function.
 */
 void loop() {
-if(PWR_OK == 1 && SIMPWR_MASTERON == 1){
-  digitalWrite(PS_ON, HIGH);
-}else{digitalWrite(PS_ON, LOW);}
+  if(PWR_OK == 1 && SIMPWR_MASTERON == 1){
+    digitalWrite(PS_ON, HIGH);
+  }
+  else{
+    digitalWrite(PS_ON, LOW);
+  }
 
+  if(SIMPWR_DISPON == 1){
+    digitalWrite(EXT_ACC3,HIGH);
+  }
+  else{
+    digitalWrite(EXT_ACC3, LOW);
+  }
 
 }
 
