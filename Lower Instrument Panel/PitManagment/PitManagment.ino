@@ -91,32 +91,26 @@
 * only once at the programm start, belongs in this function.
 */
 void setup() {
-  pinMode(PS_ON, INPUT);
-  pinMode(PWR_OK, INPUT);
-  pinMode(SIMPWR_PCPWR, INPUT);
-  pinMode(SIMPWR_PCRESET,INPUT);
-  pinMode(SIMPWR_MASTERON,INPUT);
-  pinMode(SIMPWR_DISPON,INPUT);
-  pinMode(SIMPWR_PFLT_MODE,INPUT);
-  pinMode(SIMPWR_MAINT_MODE,INPUT);
+  pinMode(PS_ON, OUTPUT);
+  pinMode(PWR_OK, INPUT_PULLUP);
+  pinMode(SIMPWR_PCPWR, INPUT_PULLUP);
+  pinMode(SIMPWR_PCRESET,INPUT_PULLUP);
+  pinMode(SIMPWR_MASTERON,INPUT_PULLUP);
+  pinMode(SIMPWR_DISPON,INPUT_PULLUP);
+  pinMode(SIMPWR_PFLT_MODE,INPUT_PULLUP);
+  pinMode(SIMPWR_MAINT_MODE,INPUT_PULLUP);
   pinMode(EXT_ACC1, OUTPUT);
   pinMode(EXT_ACC2, OUTPUT);
   pinMode(EXT_ACC3, OUTPUT);
   pinMode(EXT_ACC4, OUTPUT);
   digitalWrite(PS_ON,HIGH);
-  digitalWrite(PWR_OK,HIGH);
-  digitalWrite(SIMPWR_PCPWR,HIGH);
-  digitalWrite(SIMPWR_PCRESET,HIGH);
-  digitalWrite(SIMPWR_MASTERON,HIGH);
-  digitalWrite(SIMPWR_DISPON,HIGH);
-  digitalWrite(SIMPWR_PFLT_MODE,HIGH);
-  digitalWrite(SIMPWR_MAINT_MODE,HIGH);
+  digitalWrite(PWR_OK,LOW);
   digitalWrite(EXT_ACC1, LOW);
   digitalWrite(EXT_ACC2, LOW);
   digitalWrite(EXT_ACC3, LOW);
   digitalWrite(EXT_ACC4, LOW);
 
-
+  Serial.begin(115200);
 
 }
 
@@ -127,14 +121,15 @@ void setup() {
 * over and over in a loop, belongs in this function.
 */
 void loop() {
-  if(PWR_OK == 1 && SIMPWR_MASTERON == 1){
-    digitalWrite(PS_ON, HIGH);
-  }
-  else{
+
+  if(digitalRead(SIMPWR_MASTERON) == 0){
     digitalWrite(PS_ON, LOW);
   }
+  else{
+    digitalWrite(PS_ON, HIGH);
+  }
 
-  if(SIMPWR_DISPON == 1){
+  if(digitalRead(SIMPWR_DISPON) == 0){
     digitalWrite(EXT_ACC3,HIGH);
   }
   else{
